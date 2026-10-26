@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f4ef">
+    <title>ReUseNSUT — Campus, recirculated</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('home') }}" aria-label="ReUseNSUT home">
+            <span class="brand-mark">re</span>
+            <span>ReUse<span class="brand-light">NSUT</span></span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+            <a class="nav-link active" href="#marketplace">Marketplace</a>
+            <a class="nav-link" href="#community">Community</a>
+            <a class="nav-link" href="#impact">Our impact</a>
+        </nav>
+        <a class="campus-pill" href="#marketplace"><span class="status-dot"></span> NSUT campus</a>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="eyebrow-line"></span> GOOD THINGS, PASSED ON</p>
+                <h1>Campus life,<br><span>in good circulation.</span></h1>
+                <p class="hero-description">Find your next textbook, lend a hand, or give useful things a second life — all within the NSUT community.</p>
+                <a class="hero-cta" href="#marketplace">Explore the marketplace <span aria-hidden="true">↘</span></a>
+            </div>
+            <div class="hero-art" aria-label="Illustration of books being shared">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-orbit orbit-two"></div>
+                <div class="art-sun"></div>
+                <div class="art-spark spark-one">✳</div>
+                <div class="art-spark spark-two">✳</div>
+                <div class="book book-back"><span>pass it on</span></div>
+                <div class="book book-middle"><span>good things<br>grow around</span></div>
+                <div class="book book-front"><span>reuse<br><b>more.</b></span></div>
+                <div class="art-caption">THE NEXT CHAPTER<br>STARTS WITH YOU</div>
+            </div>
+            <div class="hero-foot"><span>01 / A MORE THOUGHTFUL CAMPUS</span><span>SCROLL TO DISCOVER ↓</span></div>
+        </section>
+
+        <section class="stats-strip" id="impact" aria-label="Marketplace impact">
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.active_listings }}</span>
+                <span class="stat-label">things looking for a new home</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.students }}</span>
+                <span class="stat-label">verified campus members</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ stats.completed_trades }}</span>
+                <span class="stat-label">successful hand-me-downs</span>
+            </div>
+            <div class="stat-item stat-highlight">
+                <span class="stat-number">{{ stats.points_awarded }}</span>
+                <span class="stat-label">sustainability points earned</span>
+            </div>
+        </section>
+
+        <section class="market-section" id="marketplace">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow"><span class="eyebrow-line"></span> THE GOOD-FIND BOARD</p>
+                    <h2>Find something <em>useful.</em></h2>
+                </div>
+                <p class="section-note">Pre-loved, ready-to-use, and closer than you think.</p>
+            </div>
+
+            <form class="filter-bar" method="get" action="{{ url_for('home') }}">
+                <label class="search-field">
+                    <span class="visually-hidden">Search items</span>
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <input type="search" name="q" value="{{ filters.q }}" placeholder="Try “calculator” or “textbook”">
+                </label>
+                <label class="select-field">
+                    <span class="visually-hidden">Category</span>
+                    <select name="category">
+                        <option value="">All categories</option>
+                        {% for row in categories %}
+                        <option value="{{ row.category_name }}" {% if filters.category == row.category_name %}selected{% endif %}>{{ row.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="select-field">
+                    <span class="visually-hidden">Listing type</span>
+                    <select name="type">
+                        <option value="">Any way to share</option>
+                        {% for value, label in listing_labels.items() %}
+                        <option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="number-field">
+                    <span class="visually-hidden">Semester</span>
+                    <input type="number" name="semester" min="1" max="8" value="{{ filters.semester }}" placeholder="Sem.">
+                </label>
+                <label class="number-field price-field">
+                    <span class="visually-hidden">Maximum price</span>
+                    <input type="number" name="max_price" min="0" step="1" value="{{ filters.max_price }}" placeholder="Max ₹">
+                </label>
+                <button class="filter-button" type="submit">Find items <span aria-hidden="true">→</span></button>
+            </form>
+
+            <div class="results-bar">
+                <span><b>{{ listings|length }}</b> {{ "good find" if listings|length == 1 else "good finds" }}</span>
+                {% if filters.q or filters.category or filters.type or filters.semester or filters.max_price %}
+                <a href="{{ url_for('home') }}" class="clear-filters">Clear filters <span aria-hidden="true">×</span></a>
+                {% endif %}
+            </div>
+
+            {% if listings %}
+            <div class="listing-grid">
+                {% for listing in listings %}
+                <article class="listing-card">
+                    <div class="card-art art-{{ loop.index0 % 4 }}">
+                        <span class="card-category">{{ listing.category_name }}</span>
+                        <span class="card-art-word">{{ listing.category_name[:1] }}</span>
+                        <span class="listing-badge badge-{{ listing.listing_type }}">{{ listing_labels[listing.listing_type] }}</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title-row">
+                            <h3>{{ listing.item_name }}</h3>
+                            <span class="condition">{{ listing.item_condition|replace('_', ' ') }}</span>
+                        </div>
+                        {% if listing.description %}
+                        <p class="card-description">{{ listing.description }}</p>
+                        {% endif %}
+                        <div class="card-details">
+                            <span>{{ listing.category_name }}{% if listing.semester %} · Sem {{ listing.semester }}{% endif %}</span>
+                            <span class="owner-score">✳ {{ listing.owner_trust_score|round|int }} trust</span>
+                        </div>
+                        <div class="card-footer">
+                            <div class="price-block">
+                                {% if listing.listing_type == "donate" %}
+                                <strong>Free</strong>
+                                {% elif listing.listing_type == "lend" %}
+                                <strong>Lend</strong>
+                                {% elif listing.listing_type == "exchange" %}
+                                <strong>Swap</strong>
+                                {% else %}
+                                <strong>₹{{ listing.price|int }}</strong>
+                                {% endif %}
+                                {% if listing.listing_type == "lend" %}
+                                <small>₹{{ listing.deposit_amount|int }} deposit · up to {{ listing.max_loan_days }} days</small>
+                                {% elif listing.listing_type == "sell" %}
+                                <small>Listed by {{ listing.owner_name }}</small>
+                                {% else %}
+                                <small>Shared by {{ listing.owner_name }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="card-arrow" aria-hidden="true">↗</span>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-mark">↗</span>
+                <h3>Nothing on this shelf just yet.</h3>
+                <p>Try another search or clear a filter to see more campus finds.</p>
+                <a href="{{ url_for('home') }}">Show everything</a>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="community-section" id="community">
+            <div class="community-intro">
+                <p class="eyebrow"><span class="eyebrow-line"></span> BETTER, TOGETHER</p>
+                <h2>A little sharing<br>goes a <em>long way.</em></h2>
+                <p>Every exchange keeps useful things in circulation and helps make campus life a little more sustainable.</p>
+                <a class="text-link" href="#marketplace">See what’s available <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="community-panels">
+                <article class="community-panel leaderboard-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-kicker">THE KINDNESS INDEX</span>
+                            <h3>Campus good-doers</h3>
+                        </div>
+                        <span class="panel-icon">✳</span>
+                    </div>
+                    {% if leaderboard %}
+                    <ol class="leaderboard">
+                        {% for student in leaderboard %}
+                        <li>
+                            <span class="rank-number">{{ "%02d"|format(loop.index) }}</span>
+                            <span class="student-initial">{{ student.name[:1] }}</span>
+                            <span class="student-info"><b>{{ student.name }}</b><small>{{ student.branch }}</small></span>
+                            <span class="student-points">{{ student.total_points }} <small>pts</small></span>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}
+                    <p class="panel-empty">Points will appear here as the community shares.</p>
+                    {% endif %}
+                </article>
+                <article class="community-panel overdue-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <span class="panel-kicker">A FRIENDLY NUDGE</span>
+                            <h3>Ready to come home</h3>
+                        </div>
+                        <span class="panel-icon">↺</span>
+                    </div>
+                    {% if overdue %}
+                    <ul class="overdue-list">
+                        {% for loan in overdue %}
+                        <li>
+                            <span class="overdue-icon">↩</span>
+                            <span class="overdue-info"><b>{{ loan.item_name }}</b><small>Borrowed by {{ loan.borrower_name }}</small></span>
+                            <span class="days-late">{{ loan.days_overdue }}d late</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="panel-empty">No overdue loans. Everything is right where it should be.</p>
+                    {% endif %}
+                    <span class="privacy-note">Visible to the campus demo community</span>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand footer-brand" href="{{ url_for('home') }}"><span class="brand-mark">re</span><span>ReUse<span class="brand-light">NSUT</span></span></a>
+        <span>Good things deserve another round.</span>
+        <span class="footer-location">BUILT FOR CAMPUS LIFE · NSUT</span>
+    </footer>
+</body>
+</html>

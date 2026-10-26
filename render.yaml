@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: reusensut
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 2 --bind 0.0.0.0:$PORT web_app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: reusensut
+      - key: DB_SSL_CA
+        value: ""

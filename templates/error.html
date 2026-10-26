@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} — ReUseNSUT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="error-page">
+    <main class="error-card">
+        <a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">re</span><span>ReUse<span class="brand-light">NSUT</span></span></a>
+        <p class="eyebrow"><span class="eyebrow-line"></span> A SMALL DETOUR</p>
+        <h1>{{ title }}</h1>
+        <p>{{ message }}</p>
+        <a class="hero-cta" href="{{ url_for('home') }}">Back to the marketplace <span aria-hidden="true">→</span></a>
+    </main>
+</body>
+</html>
