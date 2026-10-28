@@ -3,9 +3,7 @@
 
 USE reusensut;
 
--- ---------------------------------------------------------------
 -- Module 1 : User and Verification (+ Module 11 Admin via role)
--- ---------------------------------------------------------------
 CREATE TABLE users (
     user_id             INT AUTO_INCREMENT PRIMARY KEY,
     roll_number         VARCHAR(30)  NOT NULL UNIQUE,
@@ -25,9 +23,7 @@ CREATE TABLE users (
     CONSTRAINT chk_study_year CHECK (study_year BETWEEN 1 AND 4)
 );
 
--- ---------------------------------------------------------------
 -- Module 2 : Item and Category
--- ---------------------------------------------------------------
 CREATE TABLE categories (
     category_id   INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL UNIQUE,
@@ -58,9 +54,8 @@ CREATE TABLE item_images (
     FOREIGN KEY (item_id) REFERENCES items(item_id) ON DELETE CASCADE
 );
 
--- ---------------------------------------------------------------
+
 -- Module 3 : Listing  (sale / lend / exchange / donation)
--- ---------------------------------------------------------------
 CREATE TABLE listings (
     listing_id     INT AUTO_INCREMENT PRIMARY KEY,
     item_id        INT NOT NULL,
@@ -102,9 +97,7 @@ CREATE TABLE messages (
     CONSTRAINT chk_msg_parties CHECK (sender_id <> receiver_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 4 : Request and Order
--- ---------------------------------------------------------------
 CREATE TABLE listing_requests (
     request_id      INT AUTO_INCREMENT PRIMARY KEY,
     listing_id      INT NOT NULL,
@@ -131,9 +124,7 @@ CREATE TABLE transactions (
     FOREIGN KEY (request_id) REFERENCES listing_requests(request_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 5 : Loan and Return
--- ---------------------------------------------------------------
 CREATE TABLE loans (
     transaction_id          INT PRIMARY KEY,
     borrowed_at             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -146,9 +137,7 @@ CREATE TABLE loans (
     FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 6 : Payment and Deposit
--- ---------------------------------------------------------------
 CREATE TABLE payments (
     payment_id     INT AUTO_INCREMENT PRIMARY KEY,
     transaction_id INT NOT NULL,
@@ -164,9 +153,7 @@ CREATE TABLE payments (
     CONSTRAINT chk_amount CHECK (amount >= 0)
 );
 
--- ---------------------------------------------------------------
 -- Module 7 : Review and Trust Score (trust score = view, see 02 file)
--- ---------------------------------------------------------------
 CREATE TABLE reviews (
     review_id      INT AUTO_INCREMENT PRIMARY KEY,
     transaction_id INT NOT NULL,
@@ -183,9 +170,7 @@ CREATE TABLE reviews (
     CONSTRAINT chk_review_parties CHECK (reviewer_id <> reviewee_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 8 : Dispute  (+ reports and admin actions)
--- ---------------------------------------------------------------
 CREATE TABLE disputes (
     dispute_id        INT AUTO_INCREMENT PRIMARY KEY,
     transaction_id    INT NOT NULL,
@@ -228,9 +213,7 @@ CREATE TABLE report_actions (
     FOREIGN KEY (admin_id)  REFERENCES users(user_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 9 : Notification
--- ---------------------------------------------------------------
 CREATE TABLE notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id         INT NOT NULL,
@@ -241,9 +224,7 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- ---------------------------------------------------------------
 -- Module 10 : Sustainability Points
--- ---------------------------------------------------------------
 CREATE TABLE sustainability_points (
     point_id       INT AUTO_INCREMENT PRIMARY KEY,
     user_id        INT NOT NULL,
