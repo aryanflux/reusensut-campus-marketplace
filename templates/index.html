@@ -24,23 +24,34 @@
     <main>
         <section class="hero">
             <div class="hero-copy">
-                <p class="eyebrow"><span class="eyebrow-line"></span> GOOD THINGS, PASSED ON</p>
-                <h1>Campus life,<br><span>in good circulation.</span></h1>
-                <p class="hero-description">Find your next textbook, lend a hand, or give useful things a second life — all within the NSUT community.</p>
-                <a class="hero-cta" href="#marketplace">Explore the marketplace <span aria-hidden="true">↘</span></a>
+                <p class="eyebrow"><span class="eyebrow-line"></span> A CAMPUS THAT SHARES</p>
+                <h1>Good things<br>find a second <span class="hero-highlight">life.</span></h1>
+                <p class="hero-description">Pass it on, find your next favorite, and make campus life a little more circular.</p>
+                <div class="hero-actions">
+                    <a class="hero-cta" href="#marketplace">Explore the marketplace <span aria-hidden="true">↗</span></a>
+                    <a class="hero-secondary" href="#community">See how it works <span aria-hidden="true">↓</span></a>
+                </div>
             </div>
-            <div class="hero-art" aria-label="Illustration of books being shared">
+            <div class="hero-art" aria-hidden="true">
                 <div class="art-orbit orbit-one"></div>
                 <div class="art-orbit orbit-two"></div>
                 <div class="art-sun"></div>
+                <div class="art-pill"></div>
                 <div class="art-spark spark-one">✳</div>
-                <div class="art-spark spark-two">✳</div>
-                <div class="book book-back"><span>pass it on</span></div>
-                <div class="book book-middle"><span>good things<br>grow around</span></div>
-                <div class="book book-front"><span>reuse<br><b>more.</b></span></div>
-                <div class="art-caption">THE NEXT CHAPTER<br>STARTS WITH YOU</div>
+                <div class="art-spark spark-two">✦</div>
+                <div class="share-card share-card-back">
+                    <span class="share-card-icon">↗</span>
+                    <small>GOOD THINGS, PASSED ON</small>
+                    <b>One person's<br>old is another's<br><em>new favorite.</em></b>
+                </div>
+                <div class="share-card share-card-front">
+                    <span class="share-card-label"><span></span> ON CAMPUS NOW</span>
+                    <b>Find it.<br>Love it.<br><em>Pass it on.</em></b>
+                    <span class="share-card-footer">A little more reuse <span>✳</span></span>
+                </div>
+                <span class="art-caption">GOOD THINGS<br>GROW HERE</span>
             </div>
-            <div class="hero-foot"><span>01 / A MORE THOUGHTFUL CAMPUS</span><span>SCROLL TO DISCOVER ↓</span></div>
+            <div class="hero-foot"><span>01 / A MORE THOUGHTFUL CAMPUS</span><span>MADE TO GO AROUND ↓</span></div>
         </section>
 
         <section class="stats-strip" id="impact" aria-label="Marketplace impact">
@@ -136,7 +147,7 @@
                         </div>
                         <div class="card-footer">
                             <div class="price-block">
-                                {% if listing.listing_type == "donate" %}
+                                {% if listing.listing_type == "donation" %}
                                 <strong>Free</strong>
                                 {% elif listing.listing_type == "lend" %}
                                 <strong>Lend</strong>
@@ -147,7 +158,7 @@
                                 {% endif %}
                                 {% if listing.listing_type == "lend" %}
                                 <small>₹{{ listing.deposit_amount|int }} deposit · up to {{ listing.max_loan_days }} days</small>
-                                {% elif listing.listing_type == "sell" %}
+                                {% elif listing.listing_type == "sale" %}
                                 <small>Listed by {{ listing.owner_name }}</small>
                                 {% else %}
                                 <small>Shared by {{ listing.owner_name }}</small>

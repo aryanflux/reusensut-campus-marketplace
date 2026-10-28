@@ -10,12 +10,12 @@ from main import connect
 
 app = Flask(__name__)
 
-LISTING_TYPES = ("sell", "lend", "exchange", "donate")
+LISTING_TYPES = ("sale", "lend", "exchange", "donation")
 LISTING_LABELS = {
-    "sell": "For sale",
+    "sale": "For sale",
     "lend": "For lending",
     "exchange": "Exchange",
-    "donate": "Free",
+    "donation": "Free",
 }
 
 

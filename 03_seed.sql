@@ -53,21 +53,21 @@ INSERT INTO item_images (item_id, image_url) VALUES
 
 -- ---------------- listings -----------------
 INSERT INTO listings (item_id, listing_type, price, deposit_amount, max_loan_days, expiry_date) VALUES
-(1,  'donate',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(2,  'sell',   300,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(3,  'sell',   250,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(4,  'sell',   200,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(1,  'donation',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(2,  'sale',   300,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(3,  'sale',   250,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(4,  'sale',   200,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
 (5,  'lend',     0, 150,   30, DATE_ADD(CURDATE(), INTERVAL 60 DAY)),
 (6,  'lend',     0, 400,   14, DATE_ADD(CURDATE(), INTERVAL 60 DAY)),
-(7,  'sell',   350,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(7,  'sale',   350,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
 (8,  'lend',     0, 200,   60, DATE_ADD(CURDATE(), INTERVAL 60 DAY)),
-(9,  'donate',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(9,  'donation',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
 (10, 'lend',     0, 500,   21, DATE_ADD(CURDATE(), INTERVAL 60 DAY)),
-(11, 'sell',   450,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(12, 'sell',   120,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(13, 'donate',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(11, 'sale',   450,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(12, 'sale',   120,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+(13, 'donation',   0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
 (14, 'exchange', 0,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
-(15, 'sell',   300,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY));
+(15, 'sale',   300,   0, NULL, DATE_ADD(CURDATE(), INTERVAL 30 DAY));
 
 INSERT INTO saved_listings (user_id, listing_id) VALUES (2,3), (8,4), (10,7), (10,13);
 
@@ -147,7 +147,7 @@ INSERT INTO reports (reporter_id, reported_user_id, listing_id, report_reason, d
 (4, 6, 10, 'Late return and damage', 'Returned the Arduino kit late and damaged');
 INSERT INTO report_actions (report_id, admin_id, action_taken, action_details) VALUES
 (1, 1, 'Warning issued', 'Student warned. Deposit decision is pending in dispute 2');
-UPDATE reports SET report_status = 'actioned' WHERE report_id = 1;
+UPDATE reports SET report_status = 'action_taken' WHERE report_id = 1;
 
 -- send reminders and mark overdue loans
 CALL refresh_overdue();

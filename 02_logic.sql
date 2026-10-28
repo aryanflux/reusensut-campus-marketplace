@@ -1,10 +1,6 @@
 -- ReUseNSUT : File 2 of 4 : views, triggers and stored procedures
 USE reusensut;
-
--- ===============================================================
 -- VIEWS
--- ===============================================================
-
 -- Trust score (0-100) = 14 x average rating (max 70)
 --                     + 3 x on-time returns (counted up to 10, max 30)
 --                     - 5 x late returns.     No reviews yet => neutral rating of 3.
@@ -113,7 +109,7 @@ JOIN listing_requests r ON r.request_id = t.request_id
 JOIN listings l ON l.listing_id = r.listing_id
 JOIN items i    ON i.item_id    = l.item_id
 WHERE t.transaction_status = 'completed'
-  AND l.listing_type IN ('sell','donate','exchange');
+  AND l.listing_type IN ('sale','donation','exchange');
 
 CREATE VIEW v_open_disputes AS
 SELECT d.dispute_id, d.transaction_id, i.item_name, d.dispute_reason, d.description,
@@ -226,7 +222,7 @@ BEGIN
     IF OLD.transaction_status <> 'completed' AND NEW.transaction_status = 'completed' THEN
         IF EXISTS (SELECT 1 FROM payments
                    WHERE transaction_id = NEW.transaction_id
-                     AND payment_type = 'sale' AND payment_status <> 'paid') THEN
+                     AND payment_type = 'purchase' AND payment_status <> 'completed') THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sale payment is not confirmed yet';
         END IF;
     END IF;
@@ -250,7 +246,7 @@ BEGIN
         JOIN items i    ON i.item_id    = l.item_id
         WHERE r.request_id = NEW.request_id;
 
-        SET v_pts = CASE v_type WHEN 'donate' THEN 20 WHEN 'lend' THEN 15
+        SET v_pts = CASE v_type WHEN 'donation' THEN 20 WHEN 'lend' THEN 15
                                 WHEN 'exchange' THEN 15 ELSE 10 END;
 
         INSERT INTO sustainability_points (user_id, transaction_id, points, reason)
@@ -298,7 +294,7 @@ BEGIN
         IF v_late = 0 AND COALESCE(NEW.returned_good_condition, 0) = 1 THEN
             UPDATE payments SET payment_status = 'refunded'
             WHERE transaction_id = NEW.transaction_id
-              AND payment_type = 'deposit' AND payment_status = 'held';
+              AND payment_type = 'deposit' AND payment_status = 'completed';
             INSERT INTO notifications (user_id, notif_type, message)
             VALUES (v_borrower, 'deposit',
                     CONCAT('Thanks for returning "', v_item, '" on time. Your deposit is refunded'));
@@ -311,7 +307,8 @@ BEGIN
         END IF;
 
         UPDATE transactions SET transaction_status = 'completed', completed_at = NEW.returned_at
-        WHERE transaction_id = NEW.transaction_id AND transaction_status = 'in_progress';
+        WHERE transaction_id = NEW.transaction_id
+          AND transaction_status IN ('pending_handover', 'in_progress');
     END IF;
 END$$
 
@@ -319,7 +316,7 @@ END$$
 CREATE TRIGGER trg_review_before_insert BEFORE INSERT ON reviews
 FOR EACH ROW
 BEGIN
-    DECLARE v_status VARCHAR(15);
+    DECLARE v_status VARCHAR(20);
     DECLARE v_owner INT;
     DECLARE v_req INT;
     SELECT t.transaction_status, i.owner_id, r.requester_id INTO v_status, v_owner, v_req
@@ -463,9 +460,9 @@ BEGIN
     VALUES (p_request, v_price, p_location, p_time);
     SET v_txn = LAST_INSERT_ID();
 
-    IF v_type = 'sell' AND v_price > 0 THEN
+    IF v_type = 'sale' AND v_price > 0 THEN
         INSERT INTO payments (transaction_id, payer_id, payment_type, amount, payment_status)
-        VALUES (v_txn, v_requester, 'sale', v_price, 'pending');
+        VALUES (v_txn, v_requester, 'purchase', v_price, 'pending');
     END IF;
 
     IF v_type = 'lend' THEN
@@ -473,7 +470,7 @@ BEGIN
         VALUES (v_txn, DATE_ADD(CURDATE(), INTERVAL v_days DAY));
         IF v_deposit > 0 THEN
             INSERT INTO payments (transaction_id, payer_id, payment_type, amount, payment_status, paid_at)
-            VALUES (v_txn, v_requester, 'deposit', v_deposit, 'held', NOW());
+            VALUES (v_txn, v_requester, 'deposit', v_deposit, 'completed', NOW());
         END IF;
     END IF;
     COMMIT;
@@ -488,14 +485,14 @@ END$$
 CREATE PROCEDURE confirm_payment(IN p_txn INT, IN p_method VARCHAR(10))
 BEGIN
     UPDATE payments
-    SET payment_status = 'paid', payment_method = p_method, paid_at = NOW()
-    WHERE transaction_id = p_txn AND payment_type = 'sale' AND payment_status = 'pending';
+    SET payment_status = 'completed', payment_method = p_method, paid_at = NOW()
+    WHERE transaction_id = p_txn AND payment_type = 'purchase' AND payment_status = 'pending';
 END$$
 
 -- For sell / donate / exchange orders (lend orders finish through return_item)
 CREATE PROCEDURE complete_transaction(IN p_txn INT)
 BEGIN
-    DECLARE v_status VARCHAR(15);
+    DECLARE v_status VARCHAR(20);
     DECLARE v_type VARCHAR(10);
     SELECT t.transaction_status, l.listing_type INTO v_status, v_type
     FROM transactions t
@@ -505,8 +502,8 @@ BEGIN
     IF v_status IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction not found';
     END IF;
-    IF v_status <> 'in_progress' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction is not in progress';
+    IF v_status NOT IN ('pending_handover','in_progress') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction is not ready for completion';
     END IF;
     IF v_type = 'lend' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lend orders are completed when the item is returned';
@@ -559,8 +556,8 @@ BEGIN
 
     -- any deposit still held is either deducted (owner wins) or given back
     UPDATE payments
-    SET payment_status = IF(p_deduct AND p_status = 'resolved', 'deducted', 'refunded')
-    WHERE transaction_id = v_txn AND payment_type = 'deposit' AND payment_status = 'held';
+    SET payment_status = IF(p_deduct AND p_status = 'resolved', 'completed', 'refunded')
+    WHERE transaction_id = v_txn AND payment_type = 'deposit' AND payment_status = 'completed';
 END$$
 
 CREATE PROCEDURE verify_user(IN p_user INT, IN p_admin INT, IN p_status VARCHAR(10))
@@ -598,8 +595,6 @@ BEGIN
     FROM v_loan_details
     WHERE returned_at IS NULL AND loan_status = 'active' AND due_date < CURDATE();
 
-    UPDATE loans SET loan_status = 'overdue'
-    WHERE returned_at IS NULL AND loan_status = 'active' AND due_date < CURDATE();
 END$$
 
 DELIMITER ;
